@@ -1,6 +1,6 @@
 ## How to use this Repo
 
-This repo has three branches:
+This repo has one branche:
 
 * master
 
