@@ -4,16 +4,37 @@ const passport = require('passport');
 const passwordUtils = require('../lib/passwordUtils');
 const connectDB = require('../config/database');
 const {User} = require('../config/database.js');
+const genPassword = require('../lib/passwordUtils.js').genPassword;
 
 /**
  * -------------- POST ROUTES ----------------
  */
 
  // TODO
- router.post('/login', (req, res, next) => {});
+ router.post('/login',passport.authenticate('local', { failureRedirect: '/login-failure', successRedirect: 'login-success' }));
 
  // TODO
- router.post('/register', (req, res, next) => {});
+ router.post('/register', (req, res, next) => {
+
+   const saltHash = genPassword(req.body.pw);
+
+   const salt = saltHash.salt;
+    const hash = saltHash.hash;
+
+    const newUser = new User({
+        username: req.body.uname,
+        hash: hash,
+        salt: salt,
+        admin: true
+    });
+
+    newUser.save()
+        .then((user) => {
+            console.log(user);
+        });
+
+    res.redirect('/login');
+ });
 
 
  /**
@@ -28,8 +49,8 @@ router.get('/', (req, res, next) => {
 router.get('/login', (req, res, next) => {
 
     const form = '<h1>Login Page</h1><form method="POST" action="/login">\
-    Enter Username:<br><input type="text" name="username">\
-    <br>Enter Password:<br><input type="password" name="password">\
+    Enter Username:<br><input type="text" name="uname">\
+    <br>Enter Password:<br><input type="password" name="pw">\
     <br><br><input type="submit" value="Submit"></form>';
 
     res.send(form);
@@ -40,8 +61,8 @@ router.get('/login', (req, res, next) => {
 router.get('/register', (req, res, next) => {
 
     const form = '<h1>Register Page</h1><form method="post" action="register">\
-                    Enter Username:<br><input type="text" name="username">\
-                    <br>Enter Password:<br><input type="password" name="password">\
+                    Enter Username:<br><input type="text" name="uname">\
+                    <br>Enter Password:<br><input type="password" name="pw">\
                     <br><br><input type="submit" value="Submit"></form>';
 
     res.send(form);
